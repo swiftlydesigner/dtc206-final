@@ -7,15 +7,17 @@
 
 import SwiftUI
 import AVKit
+import Speech
 
 struct VideoAnalyzerView: View {
     @State private var selectedVideoURL: URL?
     @State private var videoThumbnail: Image?
-    @State private var rawTranscript: String = "Text Line 1"
+    @State private var transcribedData: SFSpeechRecognitionResult?
     @State private var enhancedTranscript: String = "Text Line 2"
     @State private var editableEnhanced: String = "Editable Text Line 3"
 
     @State private var isImporting: Bool = false
+    @State private var isTranscribing: Bool = false
 
     var body: some View {
         VStack {
@@ -34,6 +36,9 @@ struct VideoAnalyzerView: View {
                     case .success(let url):
                         self.selectedVideoURL = url
                         self.videoThumbnail = generateThumbnail(url: url)
+                        DispatchQueue.main.async {
+                            self.runAnalysis()
+                        }
                     case .failure(let error):
                         print("Error selecting video: \(error.localizedDescription)")
                 }
@@ -53,10 +58,17 @@ struct VideoAnalyzerView: View {
             }
 
             // Text Line 1
-            Text(rawTranscript)
-                .font(.headline)
-                .padding()
-            // TODO: Replace with ColoredWords
+            if let transcribedData {
+                ColoredWords(segments: transcribedData.bestTranscription.segments)
+            } else if isTranscribing {
+                Text("Transcribing...")
+                    .font(.headline)
+                    .padding()
+            } else {
+                Text("Select a video to start!")
+                    .font(.headline)
+                    .padding()
+            }
 
             // Text Line 2
             Text(enhancedTranscript)
@@ -83,6 +95,26 @@ struct VideoAnalyzerView: View {
         } catch {
             print("Error generating thumbnail: \(error)")
             return nil
+        }
+    }
+
+    private func runAnalysis() {
+        let analyzer = SpeechAnalyzer()
+
+        guard let selectedVideoURL else {
+            return
+        }
+
+        isTranscribing.toggle()
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            let result = analyzer.transcribeVideo(url: selectedVideoURL)
+
+            DispatchQueue.main.async {
+                self.transcribedData = result // This will trigger a view update
+                print (result)
+                isTranscribing.toggle()
+            }
         }
     }
 }
