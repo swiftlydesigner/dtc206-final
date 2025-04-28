@@ -12,6 +12,7 @@ struct WordColorTuple: Identifiable {
     var id: UUID = UUID()
 
     var text: String
+    var time: String
     var color: Color
     var alternativeTexts: [String]
     var confidence: Float
@@ -25,8 +26,17 @@ struct ColoredWords: View {
     @State private var selectedOption: String?
 
     var body: some View {
+        VStack(spacing: 2) {
+            ForEach(0..<wordsWithColors.count, id: \.self) { index in
+                Text("\(wordsWithColors[index].first?.time ?? "???") - \(wordsWithColors[index].last?.time ?? "???")")
+                timeDurationView(wordsWithColors[index])
+            }
+        }
+    }
+
+    func timeDurationView(_ section: [WordColorTuple]) -> some View {
         HStack(spacing: 0) {
-            ForEach(wordsWithColors) { word in
+            ForEach(section) { word in
                 tupleView(from: word)
             }
         }
@@ -50,14 +60,39 @@ struct ColoredWords: View {
         .padding(1)
     }
 
-    var wordsWithColors: [WordColorTuple] {
+    var wordsWithColors: [[WordColorTuple]] {
 
-        return segments.enumerated().map { index, word in
+        var result = [[WordColorTuple]]()
 
-            print(index, word)
+        var intermediaryResult = [WordColorTuple]()
+
+        var lastTime: TimeInterval = segments.first?.timestamp ?? 0
+        var currentTime: TimeInterval = 0
+
+        for (index, word) in segments.enumerated() {
+            if (currentTime - lastTime > 5) {
+                result.append(intermediaryResult)
+                intermediaryResult = []
+                lastTime = currentTime
+            }
+
             let color = getColorForCI(word.confidence)
-            return WordColorTuple(text: word.substring, color: color, alternativeTexts: word.alternativeSubstrings, confidence: word.confidence)
+            intermediaryResult.append(
+                WordColorTuple(text: word.substring,
+                               time: stringForTimeInt(word.timestamp),
+                               color: color,
+                               alternativeTexts: word.alternativeSubstrings,
+                               confidence: word.confidence)
+            )
+
+            currentTime = word.timestamp
         }
+
+        if intermediaryResult.isEmpty == false {
+            result.append(intermediaryResult)
+        }
+
+        return result
     }
 
     private func getColorForCI(_ ci: Float) -> Color {
@@ -67,5 +102,14 @@ struct ColoredWords: View {
         let green: Double = Double(ci)
 
         return Color(red: red, green: green, blue: 0.0)
+    }
+
+    private func stringForTimeInt(_ timeInt: TimeInterval) -> String {
+
+        let hours = Int(timeInt) / 3600
+        let minutes = (Int(timeInt) % 3600) / 60
+        let seconds = Int(timeInt) % 60
+
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
     }
 }
