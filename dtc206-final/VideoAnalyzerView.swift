@@ -56,11 +56,13 @@ struct VideoAnalyzerView: View {
             Text(rawTranscript)
                 .font(.headline)
                 .padding()
+            // TODO: Replace with ColoredWords
 
             // Text Line 2
             Text(enhancedTranscript)
                 .font(.subheadline)
                 .padding()
+            // TODO: Replace with ColoredWords
 
             // Editable Text Line 3
             TextField("Editable Text Line 3", text: $editableEnhanced)

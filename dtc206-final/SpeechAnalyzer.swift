@@ -22,6 +22,7 @@ public class SpeechAnalyzer {
 
             if let result {
                 recognitionResult = result
+                result.bestTranscription.segments.first!.confidence
             }
         }
 
