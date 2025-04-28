@@ -63,8 +63,8 @@ struct ColoredWords: View {
     private func getColorForCI(_ ci: Float) -> Color {
         precondition(ci >= 0 && ci <= 1, "Confidence value must be between 0 and 1")
 
-        let red: Double = Double(ci)
-        let green: Double = Double(1.0 - ci)
+        let red: Double = Double(1.0 - ci)
+        let green: Double = Double(ci)
 
         return Color(red: red, green: green, blue: 0.0)
     }
