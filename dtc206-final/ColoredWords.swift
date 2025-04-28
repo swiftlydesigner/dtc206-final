@@ -8,15 +8,20 @@
 import SwiftUI
 import Speech
 
-struct WordColorPair: Identifiable {
+struct WordColorTuple: Identifiable {
     var id: UUID = UUID()
 
     var text: String
     var color: Color
+    var alternativeTexts: [String] = []
 }
 
 struct ColoredWords: View {
     let segments: [SFTranscriptionSegment]
+
+    @State private var showActionSheet: Bool = false
+
+    @State private var selectedOption: String?
 
     var body: some View {
         HStack(spacing: 0) {
@@ -25,15 +30,29 @@ struct ColoredWords: View {
                     .foregroundColor(word.color)
                     .font(.headline)
                     .padding(2)
+                    .onTapGesture {
+                        showActionSheet = true
+                    }
+                    .actionSheet(isPresented: $showActionSheet) {
+                        ActionSheet(
+                            title: Text("Choose an option"),
+                            message: nil,
+                            buttons: word.alternativeTexts.enumerated().map { index, alternativeText in
+                                    .default(Text(alternativeText)) {
+                                        self.selectedOption = alternativeText
+                                    }
+                            } + [.cancel()]
+                        )
+                    }
             }
         }
     }
 
-    var wordsWithColors: [WordColorPair] {
+    var wordsWithColors: [WordColorTuple] {
 
         return segments.enumerated().map { index, word in
             let color = getColorForCI(word.confidence)
-            return WordColorPair(text: word.substring, color: color)
+            return WordColorTuple(text: word.substring, color: color, alternativeTexts: word.alternativeSubstrings)
         }
     }
 
