@@ -108,12 +108,12 @@ struct VideoAnalyzerView: View {
         isTranscribing.toggle()
 
         DispatchQueue.global(qos: .userInitiated).async {
-            let result = analyzer.transcribeVideo(url: selectedVideoURL)
-
-            DispatchQueue.main.async {
-                self.transcribedData = result // This will trigger a view update
-                print (result)
-                isTranscribing.toggle()
+            let result = analyzer.transcribeVideo(url: selectedVideoURL) { result in
+                DispatchQueue.main.async {
+                    self.transcribedData = result // This will trigger a view update
+                    print (result)
+                    isTranscribing.toggle()
+                }
             }
         }
     }
