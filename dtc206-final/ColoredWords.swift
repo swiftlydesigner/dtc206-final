@@ -13,7 +13,8 @@ struct WordColorTuple: Identifiable {
 
     var text: String
     var color: Color
-    var alternativeTexts: [String] = []
+    var alternativeTexts: [String]
+    var confidence: Float
 }
 
 struct ColoredWords: View {
@@ -26,33 +27,36 @@ struct ColoredWords: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(wordsWithColors) { word in
-                Text(word.text)
-                    .foregroundColor(word.color)
-                    .font(.headline)
-                    .padding(2)
-                    .onTapGesture {
-                        showActionSheet = true
-                    }
-                    .actionSheet(isPresented: $showActionSheet) {
-                        ActionSheet(
-                            title: Text("Choose an option"),
-                            message: nil,
-                            buttons: word.alternativeTexts.enumerated().map { index, alternativeText in
-                                    .default(Text(alternativeText)) {
-                                        self.selectedOption = alternativeText
-                                    }
-                            } + [.cancel()]
-                        )
-                    }
+                tupleView(from: word)
             }
         }
+    }
+
+    func tupleView(from word: WordColorTuple) -> some View {
+        VStack {
+            Text(word.text)
+                .foregroundColor(word.color)
+                .font(.headline)
+                .lineLimit(1)
+            ForEach(word.alternativeTexts, id: \.self) { altText in
+                Text("ALT: \(altText)")
+            }
+            Text(String(format: "CI: %.2f%%", word.confidence * 100))
+                .font(.caption)
+        }
+        .padding() // Padding inside the VStack
+        .border(word.color, width: 2) // Border color
+        .cornerRadius(10) // Rounded corners
+        .padding(1)
     }
 
     var wordsWithColors: [WordColorTuple] {
 
         return segments.enumerated().map { index, word in
+
+            print(index, word)
             let color = getColorForCI(word.confidence)
-            return WordColorTuple(text: word.substring, color: color, alternativeTexts: word.alternativeSubstrings)
+            return WordColorTuple(text: word.substring, color: color, alternativeTexts: word.alternativeSubstrings, confidence: word.confidence)
         }
     }
 
