@@ -62,40 +62,10 @@ struct VideoAnalyzerView: View {
                 }
 
 
-                if let transcribedData {
-                    // Show all translations
-                    if showAll {
-                        ScrollView {
-                            ForEach(Array(transcribedData.transcriptions.enumerated()), id: \.element) { index, transcription in
-                                Color.teal
-                                    .frame(maxWidth: geometry.size.width * 0.90, maxHeight: 1.5)
-                                Text(
-                                    "[\(nameFor(index: index))] Transcribed Text: (Avg CI: \(String(format: "%.5f", getAvgConfidence(for: transcription.segments)))%)"
-                                )
-                                .font(.title)
-                                ColoredWords(segments: transcription.segments)
-                            }
-                        }
-                    } else { // Only show best
-                        Color.teal
-                            .frame(maxWidth: geometry.size.width * 0.90, maxHeight: 1.5)
-
-                        Text(
-                            "[Best Transcription] Transcribed Text: (Avg CI: \(String(format: "%.5f", getAvgConfidence(for: transcribedData.bestTranscription.segments)))%)"
-                        )
-                        .font(.title)
-
-                        ColoredWords(segments: transcribedData.bestTranscription.segments)
-                    }
-                } else if isTranscribing {
-                    Text("Transcribing...")
-                        .font(.headline)
-                        .padding()
-                } else {
-                    Text("Select a video to start!")
-                        .font(.headline)
-                        .padding()
-                }
+                TranscriptionView(showAll: $showAll,
+                                  transcribedData: $transcribedData,
+                                  isTranscribing: $isTranscribing,
+                                  width: geometry.size.width)
 
                 Color.secondary
                     .frame(maxWidth: .infinity, maxHeight: 1.5)
@@ -146,19 +116,6 @@ struct VideoAnalyzerView: View {
                 }
             }
         }
-    }
-
-
-    private func getAvgConfidence(for segment: [SFTranscriptionSegment]) -> Double {
-        let confidences = segment.reduce(0.0) {
-            $0 + Double($1.confidence)
-        }
-
-        return confidences / Double(segment.count)
-    }
-
-    private func nameFor(index: Int) -> String {
-        index == 0 ? "Best Transcription" : "Alt Transcription \(index)"
     }
 }
 
