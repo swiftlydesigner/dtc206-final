@@ -18,7 +18,7 @@ struct EnhancedTranscriptionView: View {
     var body: some View {
         VStack {
             Text("Enhanced Transcript")
-                .font(.title)
+                .font(.largeTitle)
                 .padding()
             if transcribedData != nil {
                 /// Externalizing this struct reduced performance of switch.
@@ -27,11 +27,11 @@ struct EnhancedTranscriptionView: View {
                                        width: width)
             } else if isTranscribing {
                 Text("Transcribing...")
-                    .font(.headline)
+                    .font(.title)
                     .padding()
             } else {
                 Text("Select a video to start!")
-                    .font(.headline)
+                    .font(.title)
                     .padding()
             }
         }

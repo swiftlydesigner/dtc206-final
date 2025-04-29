@@ -25,7 +25,7 @@ struct ShowTranscriptionsView: View {
                     Text(
                         "[\(self.nameFor(index: index))] Transcribed Text: (Avg CI: \(String(format: "%.5f", self.getAvgConfidence(for: transcription.segments) * 100))%)"
                     )
-                    .font(.title)
+                    .font(.largeTitle)
                     ColoredWords(segments: transcription.segments)
                 }
             }
@@ -36,7 +36,7 @@ struct ShowTranscriptionsView: View {
             Text(
                 "[Best Transcription] Transcribed Text: (Avg CI: \(String(format: "%.5f", getAvgConfidence(for: transcribedData!.bestTranscription.segments) * 100))%)"
             )
-            .font(.title)
+            .font(.largeTitle)
 
             ColoredWords(segments: transcribedData!.bestTranscription.segments)
         }

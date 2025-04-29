@@ -82,6 +82,7 @@ struct ColoredWords: View {
         VStack(spacing: 2) {
             ForEach(0..<wordsWithColors.count, id: \.self) { index in
                 Text("\(wordsWithColors[index].first?.time ?? "???") - \(wordsWithColors[index].last?.time ?? "???")")
+                    .font(.title)
                 timeDurationView(wordsWithColors[index])
             }
         }
@@ -99,13 +100,14 @@ struct ColoredWords: View {
         VStack {
             Text(word.text)
                 .foregroundColor(word.color)
-                .font(.headline)
+                .font(.title)
                 .lineLimit(1)
             ForEach(word.alternativeTexts, id: \.self) { altText in
                 Text("ALT: \(altText)")
+                    .font(.title2)
             }
             Text(String(format: "CI: %.2f%%", word.confidence * 100))
-                .font(.caption)
+                .font(.title3)
         }
         .padding() // Padding inside the VStack
         .border(word.color, width: 2) // Border color

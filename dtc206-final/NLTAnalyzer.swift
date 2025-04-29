@@ -36,7 +36,7 @@ public class NLTAnalyzer {
             var modifiedToken = token
 
             if tag == .personalName || tag == .organizationName || tag == .placeName {
-                modifiedToken = token.uppercased()
+                modifiedToken = token.uppercased(with: .current)
             }
 
             result.append(

@@ -13,12 +13,11 @@ struct ClassifiedWords: View {
     let data: String
     let segments: [SFTranscriptionSegment]
 
-    @State private var row = 0
-
     var body: some View {
         VStack(spacing: 2) {
             ForEach(0..<splitString.count, id: \.self) { index in
-                Text("Word \(row + 1) - \(row + 19)")
+                Text("Words \(index * 20 + 1) thru \(index * 20 + splitString[index].count)")
+                    .font(.title)
                 createRow(splitString[index])
             }
         }
@@ -57,13 +56,13 @@ struct ClassifiedWords: View {
 
         return VStack {
             Text(results.first?.origWord ?? "UNKNOWN")
-                .font(.headline)
+                .font(.title)
                 .lineLimit(1)
             Text(results.first?.modifiedWord ?? "UNKNOWN")
-                .font(.subheadline)
+                .font(.title2)
                 .lineLimit(1)
             Text(results.first?.type ?? "UNKNOWN")
-                .font(.caption)
+                .font(.title3)
                 .lineLimit(1)
         }
         .padding() // Padding inside the VStack
