@@ -11,25 +11,62 @@ import Speech
 struct ClassifiedWords: View {
 
     let data: String
-    let segments: [SFTranscriptionSegment]
 
     var body: some View {
         VStack(spacing: 2) {
-            ForEach(0..<splitString.count, id: \.self) { index in
-                Text("Words \(index * 20 + 1) thru \(index * 20 + splitString[index].count)")
+            ForEach(0..<naturalLanguageResults.count, id: \.self) { index in
+                Text("Words \(index * 20 + 1) thru \(index * 20 + naturalLanguageResults[index].count)")
                     .font(.title)
-                createRow(splitString[index])
+                createRow(naturalLanguageResults[index])
             }
         }
     }
 
-    var splitString: [[String]] {
-        let words = data.split(separator: " ").map { String($0) }
-        var result: [[String]] = []
-        var currentLine: [String] = []
+//    var splitString: [[String]] {
+//        let words = data.split(separator: " ").map { String($0) }
+//
+//        return splitInto(maxPerRow: 20, words)
+//    }
 
-        for word in words {
-            currentLine.append(word)
+    var naturalLanguageResults: [[NLTAnalyzerResult]] {
+        print("DATA: \(data)")
+        let result = NLTAnalyzer().process(data)
+
+        return splitInto(maxPerRow: 20, result)
+    }
+
+    func createRow(_ row: [NLTAnalyzerResult]) -> some View {
+        HStack(spacing: 0) {
+            ForEach(row) { ele in
+                tupleView(from: ele)
+            }
+        }
+    }
+
+    func tupleView(from result: NLTAnalyzerResult) -> some View {
+        VStack {
+            Text(result.origWord)
+                .font(.title)
+                .lineLimit(1)
+            Text(result.modifiedWord)
+                .font(.title2)
+                .lineLimit(1)
+            Text(result.type)
+                .font(.title3)
+                .lineLimit(1)
+        }
+        .padding() // Padding inside the VStack
+        .border(result.valid ? Color.green : Color.red, width: 2) // Border color
+        .cornerRadius(10) // Rounded corners
+        .padding(1)
+    }
+
+    private func splitInto<T>(maxPerRow max: Int, _ arr: [T]) -> [[T]] {
+        var result: [[T]] = []
+        var currentLine: [T] = []
+
+        for ele in arr {
+            currentLine.append(ele)
             if currentLine.count == 20 {
                 result.append(currentLine)
                 currentLine = []
@@ -41,33 +78,5 @@ struct ClassifiedWords: View {
         }
 
         return result
-    }
-
-    func createRow(_ row: [String]) -> some View {
-        HStack(spacing: 0) {
-            ForEach(row, id: \.self) { word in
-                tupleView(from: word)
-            }
-        }
-    }
-
-    func tupleView(from word: String) -> some View {
-        let results = NLTAnalyzer().process(word)
-
-        return VStack {
-            Text(results.first?.origWord ?? "UNKNOWN")
-                .font(.title)
-                .lineLimit(1)
-            Text(results.first?.modifiedWord ?? "UNKNOWN")
-                .font(.title2)
-                .lineLimit(1)
-            Text(results.first?.type ?? "UNKNOWN")
-                .font(.title3)
-                .lineLimit(1)
-        }
-        .padding() // Padding inside the VStack
-        .border(results.first?.valid ?? false ? Color.green : Color.red, width: 2) // Border color
-        .cornerRadius(10) // Rounded corners
-        .padding(1)
     }
 }

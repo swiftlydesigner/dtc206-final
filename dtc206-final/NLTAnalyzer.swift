@@ -8,7 +8,7 @@
 import SwiftUI
 import NaturalLanguage
 
-struct NLTAnalyzerResult: Identifiable {
+struct NLTAnalyzerResult: Identifiable, Hashable {
     var id: UUID = UUID()
 
     // Required members
@@ -17,7 +17,7 @@ struct NLTAnalyzerResult: Identifiable {
     var type: String
 
     // Computed vars
-    var valid: Bool { return origWord == modifiedWord }
+    var valid: Bool { origWord == modifiedWord && origWord != "UNKNOWN" && !origWord.isEmpty }
 }
 
 public class NLTAnalyzer {
