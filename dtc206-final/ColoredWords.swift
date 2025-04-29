@@ -16,6 +16,59 @@ struct WordColorTuple: Identifiable {
     var color: Color
     var alternativeTexts: [String]
     var confidence: Float
+
+    static func wordsWithColors(from segments: [SFTranscriptionSegment]) -> [[WordColorTuple]] {
+
+        var result = [[WordColorTuple]]()
+
+        var intermediaryResult = [WordColorTuple]()
+
+        var lastTime: TimeInterval = segments.first?.timestamp ?? 0
+        var currentTime: TimeInterval = 0
+
+        for (index, word) in segments.enumerated() {
+            if (currentTime - lastTime > 5) {
+                result.append(intermediaryResult)
+                intermediaryResult = []
+                lastTime = currentTime
+            }
+
+            let color = getColorForCI(word.confidence)
+            intermediaryResult.append(
+                WordColorTuple(text: word.substring,
+                               time: stringForTimeInt(word.timestamp),
+                               color: color,
+                               alternativeTexts: word.alternativeSubstrings,
+                               confidence: word.confidence)
+            )
+
+            currentTime = word.timestamp
+        }
+
+        if intermediaryResult.isEmpty == false {
+            result.append(intermediaryResult)
+        }
+
+        return result
+    }
+
+    private static func getColorForCI(_ ci: Float) -> Color {
+        precondition(ci >= 0 && ci <= 1, "Confidence value must be between 0 and 1")
+
+        let red: Double = Double(1.0 - ci)
+        let green: Double = Double(ci)
+
+        return Color(red: red, green: green, blue: 0.0)
+    }
+
+    private static func stringForTimeInt(_ timeInt: TimeInterval) -> String {
+
+        let hours = Int(timeInt) / 3600
+        let minutes = (Int(timeInt) % 3600) / 60
+        let seconds = Int(timeInt) % 60
+
+        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+    }
 }
 
 struct ColoredWords: View {
@@ -61,55 +114,6 @@ struct ColoredWords: View {
     }
 
     var wordsWithColors: [[WordColorTuple]] {
-
-        var result = [[WordColorTuple]]()
-
-        var intermediaryResult = [WordColorTuple]()
-
-        var lastTime: TimeInterval = segments.first?.timestamp ?? 0
-        var currentTime: TimeInterval = 0
-
-        for (index, word) in segments.enumerated() {
-            if (currentTime - lastTime > 5) {
-                result.append(intermediaryResult)
-                intermediaryResult = []
-                lastTime = currentTime
-            }
-
-            let color = getColorForCI(word.confidence)
-            intermediaryResult.append(
-                WordColorTuple(text: word.substring,
-                               time: stringForTimeInt(word.timestamp),
-                               color: color,
-                               alternativeTexts: word.alternativeSubstrings,
-                               confidence: word.confidence)
-            )
-
-            currentTime = word.timestamp
-        }
-
-        if intermediaryResult.isEmpty == false {
-            result.append(intermediaryResult)
-        }
-
-        return result
-    }
-
-    private func getColorForCI(_ ci: Float) -> Color {
-        precondition(ci >= 0 && ci <= 1, "Confidence value must be between 0 and 1")
-
-        let red: Double = Double(1.0 - ci)
-        let green: Double = Double(ci)
-
-        return Color(red: red, green: green, blue: 0.0)
-    }
-
-    private func stringForTimeInt(_ timeInt: TimeInterval) -> String {
-
-        let hours = Int(timeInt) / 3600
-        let minutes = (Int(timeInt) % 3600) / 60
-        let seconds = Int(timeInt) % 60
-
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        return WordColorTuple.wordsWithColors(from: segments)
     }
 }

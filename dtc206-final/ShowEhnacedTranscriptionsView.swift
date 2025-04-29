@@ -26,7 +26,7 @@ struct ShowEnhancedTranscriptionsView: View {
                         "[\(self.nameFor(index: index))] Transcribed Text: (Avg CI: \(String(format: "%.5f", self.getAvgConfidence(for: transcription.segments)))%)"
                     )
                     .font(.title)
-                    ColoredWords(segments: transcription.segments)
+                    ClassifiedWords(data: transcription.formattedString, segments: transcription.segments)
                 }
             }
         } else { // Only show best
@@ -38,7 +38,9 @@ struct ShowEnhancedTranscriptionsView: View {
             )
             .font(.title)
 
-            ColoredWords(segments: transcribedData!.bestTranscription.segments)
+            ClassifiedWords(
+                data: transcribedData!.bestTranscription.formattedString,
+                segments: transcribedData!.bestTranscription.segments)
         }
     }
 

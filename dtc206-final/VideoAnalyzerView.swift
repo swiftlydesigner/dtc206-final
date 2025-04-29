@@ -27,14 +27,29 @@ struct VideoAnalyzerView: View {
                     Toggle("Show All Transcriptions", isOn: $showAll)
                     
                     fileSelector
-                    
-                    thumbnailView
-                    
+
+
+                    if let thumbnail = videoThumbnail {
+                        thumbnail
+                            .resizable()
+                            .scaledToFit()
+                            .frame(height: 200)
+                            .cornerRadius(8)
+                            .padding()
+                    } else {
+                        Text("No Video Selected")
+                            .padding()
+                    }
+
                     TranscriptionView(showAll: $showAll,
                                       transcribedData: $transcribedData,
                                       isTranscribing: $isTranscribing,
                                       width: geometry.size.width)
                     
+                    Color.secondary
+                        .frame(maxWidth: .infinity, maxHeight: 1.5)
+                    Color.secondary
+                        .frame(maxWidth: .infinity, maxHeight: 1.5)
                     Color.secondary
                         .frame(maxWidth: .infinity, maxHeight: 1.5)
                     
@@ -53,24 +68,6 @@ struct VideoAnalyzerView: View {
             }
         }
         .padding()
-    }
-
-    private var thumbnailView: some View {
-        if let thumbnail = videoThumbnail {
-            return AnyView {
-                thumbnail
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 200)
-                    .cornerRadius(8)
-                    .padding()
-            }
-        } else {
-            return AnyView {
-                Text("No Video Selected")
-                    .padding()
-            }
-        }
     }
 
     private var fileSelector: some View {
