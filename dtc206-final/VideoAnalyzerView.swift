@@ -58,7 +58,17 @@ struct VideoAnalyzerView: View {
                                       transcribedData: $transcribedData,
                                       isTranscribing: $isTranscribing,
                                       width: geometry.size.width)
-                    
+
+                    Color.secondary
+                        .frame(maxWidth: .infinity, maxHeight: 1.5)
+                    Color.secondary
+                        .frame(maxWidth: .infinity, maxHeight: 1.5)
+                    Color.secondary
+                        .frame(maxWidth: .infinity, maxHeight: 1.5)
+
+                    Text("Edit Transcript Below:")
+                        .font(.largeTitle)
+                        .padding()
                     // Editable Text Line 3
                     TextField("Editable line", text: $editableEnhanced)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
