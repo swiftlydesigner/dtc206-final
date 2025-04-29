@@ -70,6 +70,9 @@ struct VideoAnalyzerView: View {
                     .padding()
             }
 
+            Color.secondary
+                .frame(maxWidth: .infinity, maxHeight: 1.5)
+
             // Text Line 2
             Text(enhancedTranscript)
                 .font(.subheadline)
