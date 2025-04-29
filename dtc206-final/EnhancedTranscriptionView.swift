@@ -22,7 +22,7 @@ struct EnhancedTranscriptionView: View {
                 .padding()
             if transcribedData != nil {
                 /// Externalizing this struct reduced performance of switch.
-                ShowTranscriptionsView(showAll: $showAll,
+                ShowEnhancedTranscriptionsView(showAll: $showAll,
                                        transcribedData: $transcribedData,
                                        width: width)
             } else if isTranscribing {
