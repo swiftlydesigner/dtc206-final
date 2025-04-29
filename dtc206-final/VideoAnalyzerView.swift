@@ -14,7 +14,6 @@ struct VideoAnalyzerView: View {
     @State private var selectedVideoURL: URL?
     @State private var videoThumbnail: Image?
     @State private var transcribedData: SFSpeechRecognitionResult?
-    @State private var enhancedTranscript: String = "Text Line 2"
     @State private var editableEnhanced: String = "Editable Text Line 3"
 
     @State private var isImporting: Bool = false
@@ -23,31 +22,34 @@ struct VideoAnalyzerView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            VStack {
-                Toggle("Show All Transcriptions", isOn: $showAll)
-
-                fileSelector
-
-                thumbnailView
-
-                TranscriptionView(showAll: $showAll,
-                                  transcribedData: $transcribedData,
-                                  isTranscribing: $isTranscribing,
-                                  width: geometry.size.width)
-
-                Color.secondary
-                    .frame(maxWidth: .infinity, maxHeight: 1.5)
-
-                // Text Line 2
-                Text(enhancedTranscript)
-                    .font(.subheadline)
-                    .padding()
-                // TODO: Replace with ColoredWords
-
-                // Editable Text Line 3
-                TextField("Editable Text Line 3", text: $editableEnhanced)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding()
+            ScrollView {
+                VStack {
+                    Toggle("Show All Transcriptions", isOn: $showAll)
+                    
+                    fileSelector
+                    
+                    thumbnailView
+                    
+                    TranscriptionView(showAll: $showAll,
+                                      transcribedData: $transcribedData,
+                                      isTranscribing: $isTranscribing,
+                                      width: geometry.size.width)
+                    
+                    Color.secondary
+                        .frame(maxWidth: .infinity, maxHeight: 1.5)
+                    
+                    // Text Line 2
+                    EnhancedTranscriptionView(showAll: $showAll,
+                                      transcribedData: $transcribedData,
+                                      isTranscribing: $isTranscribing,
+                                      width: geometry.size.width)
+                    // TODO: Replace with ColoredWords
+                    
+                    // Editable Text Line 3
+                    TextField("Editable Text Line 3", text: $editableEnhanced)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding()
+                }
             }
         }
         .padding()
