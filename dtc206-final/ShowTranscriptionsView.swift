@@ -23,7 +23,7 @@ struct ShowTranscriptionsView: View {
                     Color.teal
                         .frame(maxWidth: width * 0.90, maxHeight: 1.5)
                     Text(
-                        "[\(self.nameFor(index: index))] Transcribed Text: (Avg CI: \(String(format: "%.5f", self.getAvgConfidence(for: transcription.segments)))%)"
+                        "[\(self.nameFor(index: index))] Transcribed Text: (Avg CI: \(String(format: "%.5f", self.getAvgConfidence(for: transcription.segments) * 100))%)"
                     )
                     .font(.title)
                     ColoredWords(segments: transcription.segments)
@@ -34,7 +34,7 @@ struct ShowTranscriptionsView: View {
                 .frame(maxWidth: width * 0.90, maxHeight: 1.5)
 
             Text(
-                "[Best Transcription] Transcribed Text: (Avg CI: \(String(format: "%.5f", getAvgConfidence(for: transcribedData!.bestTranscription.segments)))%)"
+                "[Best Transcription] Transcribed Text: (Avg CI: \(String(format: "%.5f", getAvgConfidence(for: transcribedData!.bestTranscription.segments) * 100))%)"
             )
             .font(.title)
 
