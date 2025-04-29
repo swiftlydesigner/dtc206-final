@@ -58,11 +58,11 @@ struct VideoAnalyzerView: View {
                                       transcribedData: $transcribedData,
                                       isTranscribing: $isTranscribing,
                                       width: geometry.size.width)
-                    // TODO: Replace with ColoredWords
                     
                     // Editable Text Line 3
-                    TextField("Editable Text Line 3", text: $editableEnhanced)
+                    TextField("Editable line", text: $editableEnhanced)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .font(.system(size: 30))
                         .padding()
                 }
             }
@@ -118,9 +118,10 @@ struct VideoAnalyzerView: View {
         isTranscribing.toggle()
 
         DispatchQueue.global(qos: .userInitiated).async {
-            let result = analyzer.transcribeVideo(url: selectedVideoURL) { result in
+            let _: () = analyzer.transcribeVideo(url: selectedVideoURL) { result in
                 DispatchQueue.main.async {
                     self.transcribedData = result // This will trigger a view update
+                    self.editableEnhanced = result?.bestTranscription.formattedString ?? ""
                     isTranscribing.toggle()
                 }
             }
