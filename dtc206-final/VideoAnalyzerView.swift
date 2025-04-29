@@ -111,7 +111,6 @@ struct VideoAnalyzerView: View {
             let result = analyzer.transcribeVideo(url: selectedVideoURL) { result in
                 DispatchQueue.main.async {
                     self.transcribedData = result // This will trigger a view update
-                    print (result)
                     isTranscribing.toggle()
                 }
             }
