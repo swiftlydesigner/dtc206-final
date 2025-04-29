@@ -10,6 +10,7 @@ import AVKit
 import Speech
 
 struct VideoAnalyzerView: View {
+
     @State private var selectedVideoURL: URL?
     @State private var videoThumbnail: Image?
     @State private var transcribedData: SFSpeechRecognitionResult?
@@ -18,71 +19,98 @@ struct VideoAnalyzerView: View {
 
     @State private var isImporting: Bool = false
     @State private var isTranscribing: Bool = false
+    @State private var showAll: Bool = false
 
     var body: some View {
-        VStack {
-            // File Selector
-            Button(action: {
-                isImporting = true
-            }) {
-                Text("Select Video")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
-            .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie]) { result in
-                switch result {
-                    case .success(let url):
-                        self.selectedVideoURL = url
-                        self.videoThumbnail = generateThumbnail(url: url)
-                        DispatchQueue.main.async {
-                            self.runAnalysis()
-                        }
-                    case .failure(let error):
-                        print("Error selecting video: \(error.localizedDescription)")
+        GeometryReader { geometry in
+            VStack {
+                Toggle("Show All Transcriptions", isOn: $showAll)
+                // File Selector
+                Button(action: {
+                    isImporting = true
+                }) {
+                    Text("Select Video")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
                 }
+                .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie]) { result in
+                    switch result {
+                        case .success(let url):
+                            self.selectedVideoURL = url
+                            self.videoThumbnail = generateThumbnail(url: url)
+                            DispatchQueue.main.async {
+                                self.runAnalysis()
+                            }
+                        case .failure(let error):
+                            print("Error selecting video: \(error.localizedDescription)")
+                    }
+                }
+
+                // Video Thumbnail
+                if let thumbnail = videoThumbnail {
+                    thumbnail
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 200)
+                        .cornerRadius(8)
+                        .padding()
+                } else {
+                    Text("No Video Selected")
+                        .padding()
+                }
+
+
+                if let transcribedData {
+                    // Show all translations
+                    if showAll {
+                        ScrollView {
+                            ForEach(Array(transcribedData.transcriptions.enumerated()), id: \.element) { index, transcription in
+                                Color.teal
+                                    .frame(maxWidth: geometry.size.width * 0.90, maxHeight: 1.5)
+                                Text(
+                                    "[\(nameFor(index: index))] Transcribed Text: (Avg CI: \(String(format: "%.5f", getAvgConfidence(for: transcription.segments)))%)"
+                                )
+                                .font(.title)
+                                ColoredWords(segments: transcription.segments)
+                            }
+                        }
+                    } else { // Only show best
+                        Color.teal
+                            .frame(maxWidth: geometry.size.width * 0.90, maxHeight: 1.5)
+
+                        Text(
+                            "[Best Transcription] Transcribed Text: (Avg CI: \(String(format: "%.5f", getAvgConfidence(for: transcribedData.bestTranscription.segments)))%)"
+                        )
+                        .font(.title)
+
+                        ColoredWords(segments: transcribedData.bestTranscription.segments)
+                    }
+                } else if isTranscribing {
+                    Text("Transcribing...")
+                        .font(.headline)
+                        .padding()
+                } else {
+                    Text("Select a video to start!")
+                        .font(.headline)
+                        .padding()
+                }
+
+                Color.secondary
+                    .frame(maxWidth: .infinity, maxHeight: 1.5)
+
+                // Text Line 2
+                Text(enhancedTranscript)
+                    .font(.subheadline)
+                    .padding()
+                // TODO: Replace with ColoredWords
+
+                // Editable Text Line 3
+                TextField("Editable Text Line 3", text: $editableEnhanced)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
             }
-
-            // Video Thumbnail
-            if let thumbnail = videoThumbnail {
-                thumbnail
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 200)
-                    .cornerRadius(8)
-                    .padding()
-            } else {
-                Text("No Video Selected")
-                    .padding()
-            }
-
-            // Text Line 1
-            if let transcribedData {
-                ColoredWords(segments: transcribedData.bestTranscription.segments)
-            } else if isTranscribing {
-                Text("Transcribing...")
-                    .font(.headline)
-                    .padding()
-            } else {
-                Text("Select a video to start!")
-                    .font(.headline)
-                    .padding()
-            }
-
-            Color.secondary
-                .frame(maxWidth: .infinity, maxHeight: 1.5)
-
-            // Text Line 2
-            Text(enhancedTranscript)
-                .font(.subheadline)
-                .padding()
-            // TODO: Replace with ColoredWords
-
-            // Editable Text Line 3
-            TextField("Editable Text Line 3", text: $editableEnhanced)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
         }
         .padding()
     }
@@ -118,6 +146,19 @@ struct VideoAnalyzerView: View {
                 }
             }
         }
+    }
+
+
+    private func getAvgConfidence(for segment: [SFTranscriptionSegment]) -> Double {
+        let confidences = segment.reduce(0.0) {
+            $0 + Double($1.confidence)
+        }
+
+        return confidences / Double(segment.count)
+    }
+
+    private func nameFor(index: Int) -> String {
+        index == 0 ? "Best Transcription" : "Alt Transcription \(index)"
     }
 }
 
