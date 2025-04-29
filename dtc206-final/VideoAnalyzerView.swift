@@ -25,42 +25,10 @@ struct VideoAnalyzerView: View {
         GeometryReader { geometry in
             VStack {
                 Toggle("Show All Transcriptions", isOn: $showAll)
-                // File Selector
-                Button(action: {
-                    isImporting = true
-                }) {
-                    Text("Select Video")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie]) { result in
-                    switch result {
-                        case .success(let url):
-                            self.selectedVideoURL = url
-                            self.videoThumbnail = generateThumbnail(url: url)
-                            DispatchQueue.main.async {
-                                self.runAnalysis()
-                            }
-                        case .failure(let error):
-                            print("Error selecting video: \(error.localizedDescription)")
-                    }
-                }
 
-                // Video Thumbnail
-                if let thumbnail = videoThumbnail {
-                    thumbnail
-                        .resizable()
-                        .scaledToFit()
-                        .frame(height: 200)
-                        .cornerRadius(8)
-                        .padding()
-                } else {
-                    Text("No Video Selected")
-                        .padding()
-                }
+                fileSelector
 
+                thumbnailView
 
                 TranscriptionView(showAll: $showAll,
                                   transcribedData: $transcribedData,
@@ -83,6 +51,48 @@ struct VideoAnalyzerView: View {
             }
         }
         .padding()
+    }
+
+    private var thumbnailView: some View {
+        if let thumbnail = videoThumbnail {
+            return AnyView {
+                thumbnail
+                    .resizable()
+                    .scaledToFit()
+                    .frame(height: 200)
+                    .cornerRadius(8)
+                    .padding()
+            }
+        } else {
+            return AnyView {
+                Text("No Video Selected")
+                    .padding()
+            }
+        }
+    }
+
+    private var fileSelector: some View {
+        Button(action: {
+            isImporting = true
+        }) {
+            Text("Select Video")
+                .padding()
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+        .fileImporter(isPresented: $isImporting, allowedContentTypes: [.movie]) { result in
+            switch result {
+                case .success(let url):
+                    self.selectedVideoURL = url
+                    self.videoThumbnail = generateThumbnail(url: url)
+                    DispatchQueue.main.async {
+                        self.runAnalysis()
+                    }
+                case .failure(let error):
+                    print("Error selecting video: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func generateThumbnail(url: URL) -> Image? {
