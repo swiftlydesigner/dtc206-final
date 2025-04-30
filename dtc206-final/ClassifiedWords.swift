@@ -29,7 +29,6 @@ struct ClassifiedWords: View {
 //    }
 
     var naturalLanguageResults: [[NLTAnalyzerResult]] {
-        print("DATA: \(data)")
         let result = NLTAnalyzer().process(data)
 
         return splitInto(maxPerRow: 20, result)
