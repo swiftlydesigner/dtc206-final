@@ -13,12 +13,17 @@ struct VideoAnalyzerView: View {
 
     @State private var selectedVideoURL: URL?
     @State private var videoThumbnail: Image?
+    @State private var player: AVPlayer?
+    @State private var isPlaying = false
+
     @State private var transcribedData: SFSpeechRecognitionResult?
     @State private var editableEnhanced: String = "Editable Text Line 3"
 
     @State private var isImporting: Bool = false
     @State private var isTranscribing: Bool = false
     @State private var showAll: Bool = false
+
+
 
     var body: some View {
         GeometryReader { geometry in
@@ -29,16 +34,28 @@ struct VideoAnalyzerView: View {
                     fileSelector
 
 
-                    if let thumbnail = videoThumbnail {
-                        thumbnail
-                            .resizable()
+                    if isPlaying {
+                        VideoPlayer(player: player)
                             .scaledToFit()
-                            .frame(height: 200)
+                            .frame(height: 300)
+                            .frame(maxWidth: .infinity)
                             .cornerRadius(8)
                             .padding()
                     } else {
-                        Text("No Video Selected")
-                            .padding()
+                        if let thumbnail = videoThumbnail {
+                            thumbnail
+                                .resizable()
+                                .scaledToFit()
+                                .frame(height: 200)
+                                .cornerRadius(8)
+                                .padding()
+                                .onTapGesture {
+                                    togglePlayback()
+                                }
+                        } else {
+                            Text("No Video Selected")
+                                .padding()
+                        }
                     }
 
                     TranscriptionView(showAll: $showAll,
@@ -69,7 +86,6 @@ struct VideoAnalyzerView: View {
                     Text("Edit Transcript Below:")
                         .font(.largeTitle)
                         .padding()
-                    // Editable Text Line 3
                     TextField("Editable line", text: $editableEnhanced)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .font(.system(size: 30))
@@ -111,11 +127,26 @@ struct VideoAnalyzerView: View {
 
         do {
             let cgImage = try imageGenerator.copyCGImage(at: time, actualTime: nil)
+
+            player = AVPlayer(url: url)
+
             return Image(decorative: cgImage, scale: 1.0, orientation: .up)
         } catch {
             print("Error generating thumbnail: \(error)")
             return nil
         }
+    }
+
+    private func togglePlayback() {
+        guard player != nil else { return }
+
+        if isPlaying {
+            player!.pause()
+        } else {
+            player!.play()
+        }
+
+        isPlaying.toggle()
     }
 
     private func runAnalysis() {
